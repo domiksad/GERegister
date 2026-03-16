@@ -62,7 +62,7 @@ public class HunterController {
 
     @Operation(summary = "Delete existing hunter by id")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHunterByID(@PathVariable Long id){
+    public ResponseEntity<Void> deleteHunterById(@PathVariable Long id){
         hunterService.deleteHunterById(id);
         return ResponseEntity.noContent().build();
     }

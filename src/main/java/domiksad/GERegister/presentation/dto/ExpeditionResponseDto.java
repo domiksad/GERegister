@@ -4,13 +4,15 @@ import domiksad.GERegister.domain.expedition.Difficulty;
 import domiksad.GERegister.domain.expedition.ExpeditionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
 
 @Getter
 @Setter
-@AllArgsConstructor()
+@AllArgsConstructor
+@NoArgsConstructor
 public class ExpeditionResponseDto {
     private Long id;
     private String name;

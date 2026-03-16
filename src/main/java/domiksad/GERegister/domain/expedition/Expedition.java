@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -17,30 +18,30 @@ public class Expedition {
     private ExpeditionStatus status;
     private Instant startDate;
     private Instant finishDate;
-    private List<Hunter> hunters;
-
-    public Expedition(String name, String description, Difficulty difficulty, ExpeditionStatus status) {
-        this.name = name;
-        this.description = description;
-        this.difficulty = difficulty;
-        this.status = status;
-    }
+    private List<Hunter> hunters = new ArrayList<>();
 
     public void addHunter(Hunter hunter) {
+        if (status != ExpeditionStatus.CREATED)
+            throw new ExpeditionException("Expedition must be in CREATED status to add hunters");
         if (!hunters.contains(hunter)) {
             hunters.add(hunter);
         }
     }
 
     public void removeHunter(Hunter hunter) {
+        if (status != ExpeditionStatus.CREATED)
+            throw new ExpeditionException("Expedition must be in CREATED status to remove hunters");
         hunters.remove(hunter);
     }
 
     public void start() {
-        if(status != ExpeditionStatus.CREATED)
+        if (status != ExpeditionStatus.CREATED)
             throw new ExpeditionException("Expedition must be in CREATED status to start");
 
-        if(hunters.stream().anyMatch(Hunter::isInProgress))
+        if(hunters.isEmpty())
+            throw new ExpeditionException("Cannot start expedition without hunters");
+
+        if (hunters.stream().anyMatch(Hunter::isInProgress))
             throw new ExpeditionException("One or more hunters are already in another expedition");
 
         status = ExpeditionStatus.IN_PROGRESS;
@@ -51,6 +52,6 @@ public class Expedition {
         if (status == ExpeditionStatus.IN_PROGRESS) {
             status = ExpeditionStatus.FINISHED;
             finishDate = Instant.now();
-        }
+        } else throw new ExpeditionException("Expedition must be in IN_PROGRESS status to finish");
     }
 }

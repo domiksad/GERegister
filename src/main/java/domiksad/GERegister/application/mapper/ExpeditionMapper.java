@@ -5,12 +5,9 @@ import domiksad.GERegister.infrastructure.entity.ExpeditionEntity;
 import domiksad.GERegister.presentation.dto.ExpeditionRequestDto;
 import domiksad.GERegister.presentation.dto.ExpeditionResponseDto;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface ExpeditionMapper {
-
-    ExpeditionMapper INSTANCE = Mappers.getMapper(ExpeditionMapper.class);
 
     Expedition expeditionRequestDtoToExpedition(ExpeditionRequestDto expeditionRequestDto);
 
@@ -23,5 +20,10 @@ public interface ExpeditionMapper {
     default ExpeditionResponseDto expeditionEntityToExpeditionResponseDto(ExpeditionEntity expeditionEntity) {
         Expedition expedition = expeditionEntityToExpedition(expeditionEntity);
         return expeditionToExpeditionResponseDto(expedition);
+    }
+
+    default ExpeditionEntity expeditionRequestDtoToExpeditionEntity(ExpeditionRequestDto expeditionRequestDto) {
+        Expedition expedition = expeditionRequestDtoToExpedition(expeditionRequestDto);
+        return expeditionToExpeditionEntity(expedition);
     }
 }

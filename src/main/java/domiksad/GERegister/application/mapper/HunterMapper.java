@@ -5,12 +5,9 @@ import domiksad.GERegister.infrastructure.entity.HunterEntity;
 import domiksad.GERegister.presentation.dto.HunterRequestDto;
 import domiksad.GERegister.presentation.dto.HunterResponseDto;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface HunterMapper {
-
-    HunterMapper INSTANCE = Mappers.getMapper(HunterMapper.class);
 
     Hunter hunterRequestDtoToHunter(HunterRequestDto hunterRequestDto);
 
