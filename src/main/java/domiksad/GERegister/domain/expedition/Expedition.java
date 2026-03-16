@@ -15,7 +15,7 @@ public class Expedition {
     private String name;
     private String description;
     private Difficulty difficulty;
-    private ExpeditionStatus status;
+    private ExpeditionStatus status = ExpeditionStatus.CREATED;
     private Instant startDate;
     private Instant finishDate;
     private List<Hunter> hunters = new ArrayList<>();
@@ -25,6 +25,7 @@ public class Expedition {
             throw new ExpeditionException("Expedition must be in CREATED status to add hunters");
         if (!hunters.contains(hunter)) {
             hunters.add(hunter);
+            hunter.addExpedition(this);
         }
     }
 

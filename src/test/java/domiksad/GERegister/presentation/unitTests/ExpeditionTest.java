@@ -18,6 +18,8 @@ public class ExpeditionTest {
         expedition = new Expedition();
     }
 
+    // add normal use
+
     @Test
     void shouldThrowException_whenAddingToInProgressExpedition(){
         expedition.addHunter(hunter);
@@ -47,7 +49,15 @@ public class ExpeditionTest {
     @Test
     public void shouldThrowException_whenAssignedHunterIsOnExpedition(){
         expedition.addHunter(hunter);
-        assertThrows(ExpeditionException.class, expedition::start);
+        Expedition expedition2 = new Expedition();
+        expedition2.addHunter(hunter);
+
+        expedition.start();
+
+        IO.println(hunter.isInProgress());
+        assertThrows(ExpeditionException.class, () -> {
+            expedition2.start();
+        });
     }
 
     @Test

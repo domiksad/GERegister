@@ -1,7 +1,6 @@
 package domiksad.GERegister.presentation.dto;
 
 import domiksad.GERegister.domain.expedition.Difficulty;
-import domiksad.GERegister.domain.expedition.ExpeditionStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -23,7 +22,4 @@ public class ExpeditionRequestDto {
 
     @NotNull(message = "Field 'difficulty' is required")
     private Difficulty difficulty;
-
-    @NotNull(message = "Field 'status' is required")
-    private ExpeditionStatus status;
 }
