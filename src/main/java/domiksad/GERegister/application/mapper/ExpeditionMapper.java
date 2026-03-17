@@ -5,25 +5,24 @@ import domiksad.GERegister.infrastructure.entity.ExpeditionEntity;
 import domiksad.GERegister.presentation.dto.ExpeditionRequestDto;
 import domiksad.GERegister.presentation.dto.ExpeditionResponseDto;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = HunterMapper.class)
 public interface ExpeditionMapper {
 
     Expedition expeditionRequestDtoToExpedition(ExpeditionRequestDto expeditionRequestDto);
 
     ExpeditionResponseDto expeditionToExpeditionResponseDto(Expedition expedition);
 
+    @Mapping(source = "hunterEntityList", target = "hunters")
     Expedition expeditionEntityToExpedition(ExpeditionEntity expeditionEntity);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(source = "hunters", target = "hunterEntityList")
     ExpeditionEntity expeditionToExpeditionEntity(Expedition expedition);
 
-    default ExpeditionResponseDto expeditionEntityToExpeditionResponseDto(ExpeditionEntity expeditionEntity) {
-        Expedition expedition = expeditionEntityToExpedition(expeditionEntity);
-        return expeditionToExpeditionResponseDto(expedition);
-    }
+    ExpeditionResponseDto expeditionEntityToExpeditionResponseDto(ExpeditionEntity expeditionEntity);
 
-    default ExpeditionEntity expeditionRequestDtoToExpeditionEntity(ExpeditionRequestDto expeditionRequestDto) {
-        Expedition expedition = expeditionRequestDtoToExpedition(expeditionRequestDto);
-        return expeditionToExpeditionEntity(expedition);
-    }
+    ExpeditionEntity expeditionRequestDtoToExpeditionEntity(ExpeditionRequestDto expeditionRequestDto);
+
 }

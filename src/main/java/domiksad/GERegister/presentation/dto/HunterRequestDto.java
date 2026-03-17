@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor()
+@AllArgsConstructor
 @NoArgsConstructor
 public class HunterRequestDto {
     @NotBlank(message = "Field 'name' is required and cannot be empty")

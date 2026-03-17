@@ -28,7 +28,7 @@ public class ExpeditionEntity {
     private String name;
     private String description;
     private Difficulty difficulty;
-    private ExpeditionStatus status;
+    private ExpeditionStatus status = ExpeditionStatus.CREATED;
     private Instant startDate;
     private Instant finishDate;
 

@@ -43,11 +43,15 @@ public class HunterService {
         return hunterMapper.hunterEntityToHunterResponseDto(hunterRepository.save(hunterMapper.hunterRequestDtoToHunterEntity(hunterRequestDto)));
     }
 
-    public HunterResponseDto update(Long id, HunterRequestDto hunterRequestDto) {
-        hunterRepository.findById(id).orElseThrow(() -> new HunterNotFoundException(id));
-        HunterEntity newHunter = hunterMapper.hunterRequestDtoToHunterEntity(hunterRequestDto);
-        newHunter.setId(id);
-        return hunterMapper.hunterEntityToHunterResponseDto(hunterRepository.save(newHunter));
+    public HunterResponseDto update(Long id, HunterRequestDto dto) {
+        HunterEntity entity = hunterRepository.findById(id)
+                .orElseThrow(() -> new HunterNotFoundException(id));
+
+        entity.setName(dto.getName());
+
+        return hunterMapper.hunterEntityToHunterResponseDto(
+                hunterRepository.save(entity)
+        );
     }
 
     public void deleteHunterById(Long id) {

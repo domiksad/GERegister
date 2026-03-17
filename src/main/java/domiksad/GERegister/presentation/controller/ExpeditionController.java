@@ -90,7 +90,7 @@ public class ExpeditionController {
     }
 
     @Operation(summary = "Remove hunter from expedition")
-    @PutMapping("/{expeditionId}/{hunterId}")
+    @DeleteMapping("/{expeditionId}/{hunterId}")
     public ResponseEntity<ExpeditionResponseDto> removeHunterFomExpedition(@PathVariable Long expeditionId, @PathVariable Long hunterId) {
         return ResponseEntity.ok(expeditionService.removeHunterFromExpedition(expeditionId, hunterId));
     }

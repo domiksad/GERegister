@@ -2,10 +2,12 @@ package domiksad.GERegister.presentation.unitTests;
 
 import domiksad.GERegister.domain.exceptions.ExpeditionException;
 import domiksad.GERegister.domain.expedition.Expedition;
+import domiksad.GERegister.domain.expedition.ExpeditionStatus;
 import domiksad.GERegister.domain.hunter.Hunter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExpeditionTest {
@@ -18,7 +20,19 @@ public class ExpeditionTest {
         expedition = new Expedition();
     }
 
-    // add normal use
+    @Test
+    void normalUse(){
+        assertEquals(ExpeditionStatus.CREATED, expedition.getStatus());
+
+        expedition.addHunter(hunter);
+        expedition.start();
+
+        assertEquals(ExpeditionStatus.IN_PROGRESS, expedition.getStatus());
+
+        expedition.finish();
+
+        assertEquals(ExpeditionStatus.FINISHED, expedition.getStatus());
+    }
 
     @Test
     void shouldThrowException_whenAddingToInProgressExpedition(){
@@ -54,7 +68,6 @@ public class ExpeditionTest {
 
         expedition.start();
 
-        IO.println(hunter.isInProgress());
         assertThrows(ExpeditionException.class, () -> {
             expedition2.start();
         });

@@ -26,6 +26,6 @@ public class HunterEntity {
 
     private String name;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "hunterEntityList")
     private List<ExpeditionEntity> expeditions;
 }

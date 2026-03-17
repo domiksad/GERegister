@@ -17,13 +17,7 @@ public interface HunterMapper {
 
     HunterEntity hunterToHunterEntity(Hunter hunter);
 
-    default HunterResponseDto hunterEntityToHunterResponseDto(HunterEntity hunterEntity) {
-        Hunter hunter = hunterEntityToHunter(hunterEntity);
-        return hunterToHunterResponseDto(hunter);
-    }
+    HunterResponseDto hunterEntityToHunterResponseDto(HunterEntity hunterEntity);
 
-    default HunterEntity hunterRequestDtoToHunterEntity(HunterRequestDto hunterRequestDto) {
-        Hunter hunter = hunterRequestDtoToHunter(hunterRequestDto);
-        return hunterToHunterEntity(hunter);
-    }
+    HunterEntity hunterRequestDtoToHunterEntity(HunterRequestDto hunterRequestDto);
 }
