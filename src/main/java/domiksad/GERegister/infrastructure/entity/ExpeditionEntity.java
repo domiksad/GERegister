@@ -7,13 +7,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import java.time.Instant;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Instant;
-import java.util.List;
 
 @Entity
 @Getter
@@ -22,16 +21,16 @@ import java.util.List;
 @AllArgsConstructor
 public class ExpeditionEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    private String name;
-    private String description;
-    private Difficulty difficulty;
-    private ExpeditionStatus status = ExpeditionStatus.CREATED;
-    private Instant startDate;
-    private Instant finishDate;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-    @ManyToMany
-    private List<HunterEntity> hunterEntityList;
+  private String name;
+  private String description;
+  private Difficulty difficulty;
+  private ExpeditionStatus status = ExpeditionStatus.CREATED;
+  private Instant startDate;
+  private Instant finishDate;
+
+  @ManyToMany private Set<HunterEntity> hunters;
 }

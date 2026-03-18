@@ -66,7 +66,7 @@ public class ExpeditionController {
     @PostMapping
     public ResponseEntity<ExpeditionResponseDto> createExpedition(@Valid @RequestBody ExpeditionRequestDto expeditionRequestDto) {
         ExpeditionResponseDto createdExpedition = expeditionService.createExpedition(expeditionRequestDto);
-        return ResponseEntity.created(URI.create("/api/expeditions/" + createdExpedition.getId())).body(createdExpedition);
+        return ResponseEntity.created(URI.create("/api/expeditions/" + createdExpedition.id())).body(createdExpedition);
     }
 
     @Operation(summary = "Update existing expedition by id")

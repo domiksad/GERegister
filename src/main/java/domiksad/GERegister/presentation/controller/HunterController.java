@@ -51,7 +51,7 @@ public class HunterController {
     @PostMapping
     public ResponseEntity<HunterResponseDto> createHunter(@Valid @RequestBody HunterRequestDto hunterRequestDto) {
         HunterResponseDto createdHunter = hunterService.createHunter(hunterRequestDto);
-        return ResponseEntity.created(URI.create("/api/hunters/" + createdHunter.getId())).body(createdHunter);
+        return ResponseEntity.created(URI.create("/api/hunters/" + createdHunter.id())).body(createdHunter);
     }
 
     @Operation(summary = "Update existing hunter by id")

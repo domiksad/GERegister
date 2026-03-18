@@ -5,13 +5,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import lombok.AccessLevel;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Entity
 @Getter
@@ -20,12 +18,12 @@ import java.util.List;
 @AllArgsConstructor()
 public class HunterEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-    private String name;
+  private String name;
 
-    @ManyToMany(mappedBy = "hunterEntityList")
-    private List<ExpeditionEntity> expeditions;
+  @ManyToMany(mappedBy = "hunterEntity")
+  private Set<ExpeditionEntity> expeditions;
 }

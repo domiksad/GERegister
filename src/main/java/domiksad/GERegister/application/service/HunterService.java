@@ -8,53 +8,54 @@ import domiksad.GERegister.infrastructure.repository.HunterRepository;
 import domiksad.GERegister.presentation.dto.ExpeditionResponseDto;
 import domiksad.GERegister.presentation.dto.HunterRequestDto;
 import domiksad.GERegister.presentation.dto.HunterResponseDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@Transactional
+@AllArgsConstructor
 public class HunterService {
 
-    private final HunterMapper hunterMapper;
-    private final ExpeditionMapper expeditionMapper;
-    @Autowired
-    HunterRepository hunterRepository;
+  private final HunterRepository hunterRepository;
 
-    public List<HunterResponseDto> getAllHunters() {
-        return hunterRepository.findAll().stream().map(hunterMapper::hunterEntityToHunterResponseDto).toList();
-    }
+  private final HunterMapper hunterMapper;
+  private final ExpeditionMapper expeditionMapper;
 
-    public HunterResponseDto getHunterById(Long id) {
-        return hunterMapper.hunterEntityToHunterResponseDto(hunterRepository.findById(id).orElseThrow(() -> new HunterNotFoundException(id)));
-    }
+  public List<HunterResponseDto> getAllHunters() {
+    return hunterRepository.findAll().stream().map(hunterMapper::hunterEntityToHunterResponseDto).toList();
+  }
 
-    public List<ExpeditionResponseDto> getHuntersExpeditions(Long id) {
-        return hunterRepository
-                .findById(id).orElseThrow(() -> new HunterNotFoundException(id))
-                .getExpeditions()
-                .stream().map(expeditionMapper::expeditionEntityToExpeditionResponseDto)
-                .toList();
-    }
+  public HunterResponseDto getHunterById(Long id) {
+    return hunterMapper.hunterEntityToHunterResponseDto(hunterRepository.findById(id).orElseThrow(() -> new HunterNotFoundException(id)));
+  }
 
-    public HunterResponseDto createHunter(HunterRequestDto hunterRequestDto) {
-        return hunterMapper.hunterEntityToHunterResponseDto(hunterRepository.save(hunterMapper.hunterRequestDtoToHunterEntity(hunterRequestDto)));
-    }
+  public List<ExpeditionResponseDto> getHuntersExpeditions(Long id) {
+    return hunterRepository
+        .findById(id).orElseThrow(() -> new HunterNotFoundException(id))
+        .getExpeditions()
+        .stream().map(expeditionMapper::toDto)
+        .toList();
+  }
 
-    public HunterResponseDto update(Long id, HunterRequestDto dto) {
-        HunterEntity entity = hunterRepository.findById(id)
-                .orElseThrow(() -> new HunterNotFoundException(id));
+  public HunterResponseDto createHunter(HunterRequestDto hunterRequestDto) {
+    return hunterMapper.hunterEntityToHunterResponseDto(hunterRepository.save(hunterMapper.hunterRequestDtoToHunterEntity(hunterRequestDto)));
+  }
 
-        entity.setName(dto.getName());
+  public HunterResponseDto update(Long id, HunterRequestDto dto) {
+    HunterEntity entity = hunterRepository.findById(id)
+        .orElseThrow(() -> new HunterNotFoundException(id));
 
-        return hunterMapper.hunterEntityToHunterResponseDto(
-                hunterRepository.save(entity)
-        );
-    }
+    entity.setName(dto.name());
 
-    public void deleteHunterById(Long id) {
-        hunterRepository.deleteById(id);
-    }
+    return hunterMapper.hunterEntityToHunterResponseDto(
+        hunterRepository.save(entity)
+    );
+  }
+
+  public void deleteHunterById(Long id) {
+    hunterRepository.deleteById(id);
+  }
 }

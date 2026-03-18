@@ -7,22 +7,15 @@ import domiksad.GERegister.presentation.dto.ExpeditionResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = HunterMapper.class)
+@Mapper(componentModel = "default", uses = HunterMapper.class)
 public interface ExpeditionMapper {
+  ExpeditionEntity fromDtoToEntity(ExpeditionRequestDto expeditionRequestDto);
 
-    Expedition expeditionRequestDtoToExpedition(ExpeditionRequestDto expeditionRequestDto);
+  Expedition fromEntity(ExpeditionEntity expeditionEntity);
 
-    ExpeditionResponseDto expeditionToExpeditionResponseDto(Expedition expedition);
+  ExpeditionEntity toEntity(Expedition expedition);
 
-    @Mapping(source = "hunterEntityList", target = "hunters")
-    Expedition expeditionEntityToExpedition(ExpeditionEntity expeditionEntity);
+  ExpeditionResponseDto toDto(ExpeditionEntity expeditionEntity);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(source = "hunters", target = "hunterEntityList")
-    ExpeditionEntity expeditionToExpeditionEntity(Expedition expedition);
-
-    ExpeditionResponseDto expeditionEntityToExpeditionResponseDto(ExpeditionEntity expeditionEntity);
-
-    ExpeditionEntity expeditionRequestDtoToExpeditionEntity(ExpeditionRequestDto expeditionRequestDto);
-
+  ExpeditionResponseDto toDto(Expedition expedition);
 }

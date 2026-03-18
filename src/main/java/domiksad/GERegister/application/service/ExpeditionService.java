@@ -7,7 +7,6 @@ import domiksad.GERegister.application.mapper.HunterMapper;
 import domiksad.GERegister.domain.expedition.Difficulty;
 import domiksad.GERegister.domain.expedition.Expedition;
 import domiksad.GERegister.domain.expedition.ExpeditionStatus;
-import domiksad.GERegister.domain.hunter.Hunter;
 import domiksad.GERegister.infrastructure.entity.ExpeditionEntity;
 import domiksad.GERegister.infrastructure.entity.HunterEntity;
 import domiksad.GERegister.infrastructure.repository.ExpeditionRepository;
@@ -16,8 +15,8 @@ import domiksad.GERegister.presentation.dto.ExpeditionRequestDto;
 import domiksad.GERegister.presentation.dto.ExpeditionResponseDto;
 import domiksad.GERegister.presentation.dto.HunterResponseDto;
 import jakarta.persistence.criteria.Predicate;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,120 +25,112 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@Transactional
+@AllArgsConstructor
 public class ExpeditionService {
-    private final HunterMapper hunterMapper;
-    private final ExpeditionMapper expeditionMapper;
 
-    @Autowired
-    ExpeditionRepository expeditionRepository;
-    @Autowired
-    HunterRepository hunterRepository;
+  private final ExpeditionRepository expeditionRepository;
+  private final HunterRepository hunterRepository;
 
-    public Page<ExpeditionResponseDto> getAllExpeditionsFiltered(Pageable pageable, String name, Difficulty difficulty, ExpeditionStatus status) {
-        Page<ExpeditionEntity> entities = expeditionRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+  private final HunterMapper hunterMapper;
+  private final ExpeditionMapper expeditionMapper;
 
-            if (name != null && !name.isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
-            }
-            if (difficulty != null) {
-                predicates.add(cb.equal(root.get("difficulty"), difficulty));
-            }
-            if (status != null) {
-                predicates.add(cb.equal(root.get("status"), status));
-            }
+  public Page<ExpeditionResponseDto> getAllExpeditionsFiltered(Pageable pageable, String name, Difficulty difficulty, ExpeditionStatus status) {
+    Page<ExpeditionEntity> entities = expeditionRepository.findAll((root, query, cb) -> {
+      List<Predicate> predicates = new ArrayList<>();
 
-            return cb.and(predicates.toArray(new Predicate[0]));
-        }, pageable);
+      if (name != null && !name.isEmpty()) {
+        predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+      }
+      if (difficulty != null) {
+        predicates.add(cb.equal(root.get("difficulty"), difficulty));
+      }
+      if (status != null) {
+        predicates.add(cb.equal(root.get("status"), status));
+      }
 
-        return entities.map(expeditionMapper::expeditionEntityToExpeditionResponseDto);
-    }
+      return cb.and(predicates.toArray(new Predicate[0]));
+    }, pageable);
 
-    public ExpeditionResponseDto getExpeditionById(Long id) {
-        return expeditionMapper.expeditionEntityToExpeditionResponseDto(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
-    }
+    return entities.map(expeditionMapper::toDto);
+  }
 
-    public List<HunterResponseDto> getHuntersAssignedToExpedition(Long id) {
-        return expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)).getHunterEntityList().stream().map(hunterMapper::hunterEntityToHunterResponseDto).toList();
-    }
+  public ExpeditionResponseDto getExpeditionById(Long id) {
+    return expeditionMapper.toDto(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
+  }
 
-    public ExpeditionResponseDto createExpedition(ExpeditionRequestDto expeditionRequestDto) {
-        return expeditionMapper.expeditionEntityToExpeditionResponseDto(expeditionRepository.save(expeditionMapper.expeditionRequestDtoToExpeditionEntity(expeditionRequestDto)));
-    }
+  public List<HunterResponseDto> getHuntersAssignedToExpedition(Long id) {
+    return expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)).getHunters().stream().map(hunterMapper::hunterEntityToHunterResponseDto).toList();
+  }
 
-    public ExpeditionResponseDto update(Long id, ExpeditionRequestDto dto) {
-        ExpeditionEntity entity = expeditionRepository.findById(id)
-                .orElseThrow(() -> new ExpeditionNotFoundException(id));
+  public ExpeditionResponseDto createExpedition(ExpeditionRequestDto expeditionRequestDto) {
+    return expeditionMapper.toDto(expeditionRepository.save(expeditionMapper.fromDtoToEntity(expeditionRequestDto)));
+  }
 
-        entity.setName(dto.getName());
-        entity.setDescription(dto.getDescription());
-        entity.setDifficulty(dto.getDifficulty());
+  public ExpeditionResponseDto update(Long id, ExpeditionRequestDto dto) {
+    ExpeditionEntity entity = expeditionRepository.findById(id)
+        .orElseThrow(() -> new ExpeditionNotFoundException(id));
 
-        return expeditionMapper.expeditionEntityToExpeditionResponseDto(
-                expeditionRepository.save(entity)
-        );
-    }
+    entity.setName(dto.name());
+    entity.setDescription(dto.description());
+    entity.setDifficulty(dto.difficulty());
 
-    public void deleteExpeditionById(Long id) {
-        expeditionRepository.deleteById(id);
-    }
+    return expeditionMapper.toDto(
+        expeditionRepository.save(entity)
+    );
+  }
 
-    public ExpeditionResponseDto assignHunterToExpedition(Long expeditionId, Long hunterId) {
-        ExpeditionEntity expedition = expeditionRepository.findById(expeditionId)
-                .orElseThrow(() -> new ExpeditionNotFoundException(expeditionId));
+  public void deleteExpeditionById(Long id) {
+    expeditionRepository.deleteById(id);
+  }
 
-        HunterEntity hunter = hunterRepository.findById(hunterId)
-                .orElseThrow(() -> new HunterNotFoundException(hunterId));
+  public ExpeditionResponseDto assignHunterToExpedition(Long expeditionId, Long hunterId) {
+    ExpeditionEntity expedition = expeditionRepository.findById(expeditionId)
+        .orElseThrow(() -> new ExpeditionNotFoundException(expeditionId));
 
-        if (expedition.getHunterEntityList() == null) {
-            expedition.setHunterEntityList(new ArrayList<>());
-        }
+    HunterEntity hunter = hunterRepository.findById(hunterId)
+        .orElseThrow(() -> new HunterNotFoundException(hunterId));
 
-        expedition.getHunterEntityList().add(hunter);
+    expedition.getHunters().add(hunter);
 
-        expeditionRepository.save(expedition);
+    expeditionRepository.save(expedition);
 
-        return expeditionMapper.expeditionEntityToExpeditionResponseDto(expedition);
-    }
+    return expeditionMapper.toDto(expedition);
+  }
 
-    public ExpeditionResponseDto removeHunterFromExpedition(Long expeditionId, Long hunterId) {
-        ExpeditionEntity expedition = expeditionRepository.findById(expeditionId)
-                .orElseThrow(() -> new ExpeditionNotFoundException(expeditionId));
+  public ExpeditionResponseDto removeHunterFromExpedition(Long expeditionId, Long hunterId) {
+    ExpeditionEntity expedition = expeditionRepository.findById(expeditionId)
+        .orElseThrow(() -> new ExpeditionNotFoundException(expeditionId));
 
-        HunterEntity hunter = hunterRepository.findById(hunterId)
-                .orElseThrow(() -> new HunterNotFoundException(hunterId));
+    HunterEntity hunter = hunterRepository.findById(hunterId)
+        .orElseThrow(() -> new HunterNotFoundException(hunterId));
 
-        if (expedition.getHunterEntityList() == null) {
-            expedition.setHunterEntityList(new ArrayList<>());
-        }
+    expedition.getHunters().remove(hunter);
 
-        expedition.getHunterEntityList().remove(hunter);
+    expeditionRepository.save(expedition);
 
-        expeditionRepository.save(expedition);
+    return expeditionMapper.toDto(expedition);
+  }
 
-        return expeditionMapper.expeditionEntityToExpeditionResponseDto(expedition);
-    }
+  public ExpeditionResponseDto startExpedition(Long id) {
+    Expedition expedition = expeditionMapper.fromEntity(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
+    expedition.start();
 
-    public ExpeditionResponseDto startExpedition(Long id) {
-        Expedition expedition = expeditionMapper.expeditionEntityToExpedition(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
-        expedition.start();
+    ExpeditionEntity saved = expeditionMapper.toEntity(expedition);
+    saved.setId(id);
+    expeditionRepository.save(saved);
 
-        ExpeditionEntity saved = expeditionMapper.expeditionToExpeditionEntity(expedition);
-        saved.setId(id);
-        expeditionRepository.save(saved);
+    return expeditionMapper.toDto(expedition);
+  }
 
-        return expeditionMapper.expeditionToExpeditionResponseDto(expedition);
-    }
+  public ExpeditionResponseDto finishExpedition(Long id) {
+    Expedition expedition = expeditionMapper.fromEntity(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
+    expedition.finish();
 
-    public ExpeditionResponseDto finishExpedition(Long id) {
-        Expedition expedition = expeditionMapper.expeditionEntityToExpedition(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
-        expedition.finish();
+    ExpeditionEntity saved = expeditionMapper.toEntity(expedition);
+    saved.setId(id);
+    expeditionRepository.save(saved);
 
-        ExpeditionEntity saved = expeditionMapper.expeditionToExpeditionEntity(expedition);
-        saved.setId(id);
-        expeditionRepository.save(saved);
-
-        return expeditionMapper.expeditionToExpeditionResponseDto(expedition);
-    }
+    return expeditionMapper.toDto(expedition);
+  }
 }

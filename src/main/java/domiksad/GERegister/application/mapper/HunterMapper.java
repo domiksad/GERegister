@@ -6,7 +6,7 @@ import domiksad.GERegister.presentation.dto.HunterRequestDto;
 import domiksad.GERegister.presentation.dto.HunterResponseDto;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "default")
 public interface HunterMapper {
 
     Hunter hunterRequestDtoToHunter(HunterRequestDto hunterRequestDto);
