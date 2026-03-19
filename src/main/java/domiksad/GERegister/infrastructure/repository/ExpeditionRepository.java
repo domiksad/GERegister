@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
-public interface ExpeditionRepository extends JpaRepository<ExpeditionEntity, Long>, JpaSpecificationExecutor<ExpeditionEntity> {
+public interface ExpeditionRepository extends JpaRepository<ExpeditionEntity, UUID>, JpaSpecificationExecutor<ExpeditionEntity> {
 }

@@ -1,3 +1,5 @@
 package domiksad.GERegister.presentation.dto;
 
-public record HunterResponseDto(Long id, String name) {}
+import java.util.UUID;
+
+public record HunterResponseDto(UUID id, String name) {}

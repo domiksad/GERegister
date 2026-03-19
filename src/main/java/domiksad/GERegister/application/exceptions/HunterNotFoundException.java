@@ -1,7 +1,9 @@
 package domiksad.GERegister.application.exceptions;
 
+import java.util.UUID;
+
 public class HunterNotFoundException extends RuntimeException {
-    public HunterNotFoundException(Long id) {
-        super("Hunter with id " + id + " not found");
+    public HunterNotFoundException(UUID id) {
+        super("Hunter with id " + id.toString() + " not found");
     }
 }

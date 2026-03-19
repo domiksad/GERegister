@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Hunter {
-  private Long id;
+  private UUID id;
 
   private String name;
   private Set<Expedition> expeditions = new HashSet<>();

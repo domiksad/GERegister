@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -52,18 +54,19 @@ public class ExpeditionController {
 
     @Operation(summary = "Get expedition by id")
     @GetMapping("/{id}")
-    public ResponseEntity<ExpeditionResponseDto> getExpeditionById(@PathVariable Long id) {
+    public ResponseEntity<ExpeditionResponseDto> getExpeditionById(@PathVariable UUID id) {
         return ResponseEntity.ok(expeditionService.getExpeditionById(id));
     }
 
     @Operation(summary = "Get hunters assigned to expedition")
     @GetMapping("/{id}/hunters")
-    public ResponseEntity<List<HunterResponseDto>> getHuntersAssignedToExpedition(@PathVariable Long id) {
+    public ResponseEntity<List<HunterResponseDto>> getHuntersAssignedToExpedition(@PathVariable UUID id) {
         return ResponseEntity.ok(expeditionService.getHuntersAssignedToExpedition(id));
     }
 
     @Operation(summary = "Create new expedition")
     @PostMapping
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
     public ResponseEntity<ExpeditionResponseDto> createExpedition(@Valid @RequestBody ExpeditionRequestDto expeditionRequestDto) {
         ExpeditionResponseDto createdExpedition = expeditionService.createExpedition(expeditionRequestDto);
         return ResponseEntity.created(URI.create("/api/expeditions/" + createdExpedition.id())).body(createdExpedition);
@@ -71,13 +74,15 @@ public class ExpeditionController {
 
     @Operation(summary = "Update existing expedition by id")
     @PutMapping("/{id}")
-    public ResponseEntity<ExpeditionResponseDto> updateExpedition(@PathVariable Long id, @Valid @RequestBody ExpeditionRequestDto expeditionRequestDto) {
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
+    public ResponseEntity<ExpeditionResponseDto> updateExpedition(@PathVariable UUID id, @Valid @RequestBody ExpeditionRequestDto expeditionRequestDto) {
         return ResponseEntity.ok(expeditionService.update(id, expeditionRequestDto));
     }
 
     @Operation(summary = "Delete existing expedition by id")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpeditionById(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
+    public ResponseEntity<Void> deleteExpeditionById(@PathVariable UUID id) {
         expeditionService.deleteExpeditionById(id);
         return ResponseEntity.noContent().build();
     }
@@ -85,25 +90,29 @@ public class ExpeditionController {
 
     @Operation(summary = "Add hunter to expedition")
     @PutMapping("/{expeditionId}/{hunterId}")
-    public ResponseEntity<ExpeditionResponseDto> assignHunterToExpedition(@PathVariable Long expeditionId, @PathVariable Long hunterId) {
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
+    public ResponseEntity<ExpeditionResponseDto> assignHunterToExpedition(@PathVariable UUID expeditionId, @PathVariable UUID hunterId) {
         return ResponseEntity.ok(expeditionService.assignHunterToExpedition(expeditionId, hunterId));
     }
 
     @Operation(summary = "Remove hunter from expedition")
     @DeleteMapping("/{expeditionId}/{hunterId}")
-    public ResponseEntity<ExpeditionResponseDto> removeHunterFomExpedition(@PathVariable Long expeditionId, @PathVariable Long hunterId) {
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
+    public ResponseEntity<ExpeditionResponseDto> removeHunterFomExpedition(@PathVariable UUID expeditionId, @PathVariable UUID hunterId) {
         return ResponseEntity.ok(expeditionService.removeHunterFromExpedition(expeditionId, hunterId));
     }
 
     @Operation(summary = "Start expedition")
     @PatchMapping("/{id}/start")
-    public ResponseEntity<ExpeditionResponseDto> startExpedition(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
+    public ResponseEntity<ExpeditionResponseDto> startExpedition(@PathVariable UUID id) {
         return ResponseEntity.ok(expeditionService.startExpedition(id));
     }
 
     @Operation(summary = "End expedition")
     @PatchMapping("/{id}/end")
-    public ResponseEntity<ExpeditionResponseDto> endExpedition(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
+    public ResponseEntity<ExpeditionResponseDto> endExpedition(@PathVariable UUID id) {
         return ResponseEntity.ok(expeditionService.finishExpedition(id));
     }
 }

@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -28,11 +29,11 @@ public class HunterService {
     return hunterRepository.findAll().stream().map(hunterMapper::hunterEntityToHunterResponseDto).toList();
   }
 
-  public HunterResponseDto getHunterById(Long id) {
+  public HunterResponseDto getHunterById(UUID id) {
     return hunterMapper.hunterEntityToHunterResponseDto(hunterRepository.findById(id).orElseThrow(() -> new HunterNotFoundException(id)));
   }
 
-  public List<ExpeditionResponseDto> getHuntersExpeditions(Long id) {
+  public List<ExpeditionResponseDto> getHuntersExpeditions(UUID id) {
     return hunterRepository
         .findById(id).orElseThrow(() -> new HunterNotFoundException(id))
         .getExpeditions()
@@ -44,7 +45,7 @@ public class HunterService {
     return hunterMapper.hunterEntityToHunterResponseDto(hunterRepository.save(hunterMapper.hunterRequestDtoToHunterEntity(hunterRequestDto)));
   }
 
-  public HunterResponseDto update(Long id, HunterRequestDto dto) {
+  public HunterResponseDto update(UUID id, HunterRequestDto dto) {
     HunterEntity entity = hunterRepository.findById(id)
         .orElseThrow(() -> new HunterNotFoundException(id));
 
@@ -55,7 +56,7 @@ public class HunterService {
     );
   }
 
-  public void deleteHunterById(Long id) {
+  public void deleteHunterById(UUID id) {
     hunterRepository.deleteById(id);
   }
 }

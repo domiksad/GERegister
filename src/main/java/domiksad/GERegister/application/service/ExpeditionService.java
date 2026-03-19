@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -55,11 +56,11 @@ public class ExpeditionService {
     return entities.map(expeditionMapper::toDto);
   }
 
-  public ExpeditionResponseDto getExpeditionById(Long id) {
+  public ExpeditionResponseDto getExpeditionById(UUID id) {
     return expeditionMapper.toDto(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
   }
 
-  public List<HunterResponseDto> getHuntersAssignedToExpedition(Long id) {
+  public List<HunterResponseDto> getHuntersAssignedToExpedition(UUID id) {
     return expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)).getHunters().stream().map(hunterMapper::hunterEntityToHunterResponseDto).toList();
   }
 
@@ -67,7 +68,7 @@ public class ExpeditionService {
     return expeditionMapper.toDto(expeditionRepository.save(expeditionMapper.fromDtoToEntity(expeditionRequestDto)));
   }
 
-  public ExpeditionResponseDto update(Long id, ExpeditionRequestDto dto) {
+  public ExpeditionResponseDto update(UUID id, ExpeditionRequestDto dto) {
     ExpeditionEntity entity = expeditionRepository.findById(id)
         .orElseThrow(() -> new ExpeditionNotFoundException(id));
 
@@ -80,11 +81,11 @@ public class ExpeditionService {
     );
   }
 
-  public void deleteExpeditionById(Long id) {
+  public void deleteExpeditionById(UUID id) {
     expeditionRepository.deleteById(id);
   }
 
-  public ExpeditionResponseDto assignHunterToExpedition(Long expeditionId, Long hunterId) {
+  public ExpeditionResponseDto assignHunterToExpedition(UUID expeditionId, UUID hunterId) {
     ExpeditionEntity expedition = expeditionRepository.findById(expeditionId)
         .orElseThrow(() -> new ExpeditionNotFoundException(expeditionId));
 
@@ -98,7 +99,7 @@ public class ExpeditionService {
     return expeditionMapper.toDto(expedition);
   }
 
-  public ExpeditionResponseDto removeHunterFromExpedition(Long expeditionId, Long hunterId) {
+  public ExpeditionResponseDto removeHunterFromExpedition(UUID expeditionId, UUID hunterId) {
     ExpeditionEntity expedition = expeditionRepository.findById(expeditionId)
         .orElseThrow(() -> new ExpeditionNotFoundException(expeditionId));
 
@@ -112,7 +113,7 @@ public class ExpeditionService {
     return expeditionMapper.toDto(expedition);
   }
 
-  public ExpeditionResponseDto startExpedition(Long id) {
+  public ExpeditionResponseDto startExpedition(UUID id) {
     Expedition expedition = expeditionMapper.fromEntity(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
     expedition.start();
 
@@ -123,7 +124,7 @@ public class ExpeditionService {
     return expeditionMapper.toDto(expedition);
   }
 
-  public ExpeditionResponseDto finishExpedition(Long id) {
+  public ExpeditionResponseDto finishExpedition(UUID id) {
     Expedition expedition = expeditionMapper.fromEntity(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
     expedition.finish();
 

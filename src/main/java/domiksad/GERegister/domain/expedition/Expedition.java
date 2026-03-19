@@ -5,6 +5,8 @@ import domiksad.GERegister.domain.hunter.Hunter;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +17,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Expedition {
-  private Long id;
+  private UUID id;
 
   private String name;
   private String description;

@@ -15,6 +15,8 @@ import domiksad.GERegister.presentation.dto.ExpeditionResponseDto;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -22,8 +24,8 @@ public class ExpeditionMapperTest {
   private ExpeditionMapper mapper = Mappers.getMapper(ExpeditionMapper.class);
 
   private HashSet<HunterEntity> getHunterEntitySet() {
-    HunterEntity h1 = new HunterEntity(1L, "Alice", new HashSet<>());
-    HunterEntity h2 = new HunterEntity(2L, "Bob", new HashSet<>());
+    HunterEntity h1 = new HunterEntity(UUID.randomUUID(), "Alice", new HashSet<>());
+    HunterEntity h2 = new HunterEntity(UUID.randomUUID(), "Bob", new HashSet<>());
     HashSet<HunterEntity> hunters = new HashSet<>();
     hunters.add(h1);
     hunters.add(h2);
@@ -31,8 +33,8 @@ public class ExpeditionMapperTest {
   }
 
   private HashSet<Hunter> getHunterDomainSet() {
-    Hunter h1 = new Hunter(1L, "Alice", new HashSet<>());
-    Hunter h2 = new Hunter(2L, "Bob", new HashSet<>());
+    Hunter h1 = new Hunter(UUID.randomUUID(), "Alice", new HashSet<>());
+    Hunter h2 = new Hunter(UUID.randomUUID(), "Bob", new HashSet<>());
     HashSet<Hunter> hunters = new HashSet<>();
     hunters.add(h1);
     hunters.add(h2);
@@ -55,7 +57,7 @@ public class ExpeditionMapperTest {
   void entityToDomain() {
     ExpeditionEntity e1 =
         new ExpeditionEntity(
-            1L,
+            UUID.randomUUID(),
             "Test expedition",
             "Testing expedition mapping",
             Difficulty.EASY,
@@ -86,7 +88,7 @@ public class ExpeditionMapperTest {
   void domainToEntity() {
     Expedition e1 =
         new Expedition(
-            1L,
+            UUID.randomUUID(),
             "Test expedition",
             "Testing expedition mapping",
             Difficulty.EASY,
@@ -117,7 +119,7 @@ public class ExpeditionMapperTest {
   void entityToResponseDto() {
     ExpeditionEntity e1 =
         new ExpeditionEntity(
-            1L,
+            UUID.randomUUID(),
             "Test expedition",
             "Testing expedition mapping",
             Difficulty.EASY,

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -37,13 +38,13 @@ public class HunterController {
 
     @Operation(summary = "Get hunter by id")
     @GetMapping("/{id}")
-    public ResponseEntity<HunterResponseDto> getHunterById(@PathVariable Long id) {
+    public ResponseEntity<HunterResponseDto> getHunterById(@PathVariable UUID id) {
         return ResponseEntity.ok(hunterService.getHunterById(id));
     }
 
     @Operation(summary = "Get hunter's expeditions")
     @GetMapping("/{id}/expeditions")
-    public ResponseEntity<List<ExpeditionResponseDto>> getHuntersExpeditions(@PathVariable Long id) {
+    public ResponseEntity<List<ExpeditionResponseDto>> getHuntersExpeditions(@PathVariable UUID id) {
         return ResponseEntity.ok(hunterService.getHuntersExpeditions(id));
     }
 
@@ -56,13 +57,13 @@ public class HunterController {
 
     @Operation(summary = "Update existing hunter by id")
     @PutMapping("/{id}")
-    public ResponseEntity<HunterResponseDto> updateHunter(@PathVariable Long id, @Valid @RequestBody HunterRequestDto hunterRequestDto) {
+    public ResponseEntity<HunterResponseDto> updateHunter(@PathVariable UUID id, @Valid @RequestBody HunterRequestDto hunterRequestDto) {
         return ResponseEntity.ok(hunterService.update(id, hunterRequestDto));
     }
 
     @Operation(summary = "Delete existing hunter by id")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHunterById(@PathVariable Long id){
+    public ResponseEntity<Void> deleteHunterById(@PathVariable UUID id){
         hunterService.deleteHunterById(id);
         return ResponseEntity.noContent().build();
     }
