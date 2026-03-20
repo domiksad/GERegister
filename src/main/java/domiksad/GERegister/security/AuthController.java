@@ -2,56 +2,45 @@ package domiksad.GERegister.security;
 
 import domiksad.GERegister.security.dto.JwtResponse;
 import domiksad.GERegister.security.dto.LoginRequest;
+import domiksad.GERegister.security.dto.RegisterRequest;
 import domiksad.GERegister.security.dto.SignupRequest;
 import domiksad.GERegister.security.entity.Role;
-import domiksad.GERegister.security.entity.User;
-import domiksad.GERegister.security.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-  private final AuthenticationManager authenticationManager;
-  private final UserRepository userRepository;
-  private final PasswordEncoder encoder;
-  private final JwtUtil jwtUtil;
-
-  @PostMapping("/login")
-  public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-    Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
-
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    String jwt = jwtUtil.generateToken(authentication.getName());
-    return ResponseEntity.ok(new JwtResponse(jwt));
-  }
+  private final AuthService authService;
 
   @PostMapping("/register")
-  public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-    if (userRepository.existsByUsername(signUpRequest.username())) {
-      return ResponseEntity.badRequest().body("Error: Username is already taken!");
-    }
+  public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    return ResponseEntity.ok(authService.register(request));
+  }
 
-    User user = new User();
-    user.setUsername(signUpRequest.username());
-    user.setPassword(encoder.encode(signUpRequest.password())); // Hashowanie haseł
-    user.setRoles(Set.of(Role.HUNTER)); // Domyślna rola
+  @PostMapping("/login")
+  public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
+    return ResponseEntity.ok(authService.login(request));
+  }
 
-    userRepository.save(user);
-    return ResponseEntity.ok("User registered successfully!");
+  @GetMapping("/me")
+  public ResponseEntity<?> me(Authentication authentication) {
+    return ResponseEntity.ok(Map.of(
+        "username", authentication.getName(),
+        "roles", authentication.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .toList()
+    ));
   }
 }

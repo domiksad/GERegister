@@ -42,6 +42,7 @@ public class ExpeditionController {
     //<editor-fold desc="Expedition CRUD">
     @Operation(summary = "Get all expeditions with pagination and filtering")
     @GetMapping
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
     public ResponseEntity<Page<ExpeditionResponseDto>> getAllExpeditions(
             @PageableDefault(size = 10) Pageable pageable,
             @RequestParam(required = false) String name,
@@ -54,12 +55,14 @@ public class ExpeditionController {
 
     @Operation(summary = "Get expedition by id")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMMANDER') or @expeditionSecurity.isHunterInExpedition(#id, authentication.name)")
     public ResponseEntity<ExpeditionResponseDto> getExpeditionById(@PathVariable UUID id) {
         return ResponseEntity.ok(expeditionService.getExpeditionById(id));
     }
 
     @Operation(summary = "Get hunters assigned to expedition")
     @GetMapping("/{id}/hunters")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMMANDER') or @expeditionSecurity.isHunterInExpedition(#id, authentication.name)")
     public ResponseEntity<List<HunterResponseDto>> getHuntersAssignedToExpedition(@PathVariable UUID id) {
         return ResponseEntity.ok(expeditionService.getHuntersAssignedToExpedition(id));
     }
