@@ -33,27 +33,28 @@ public class HunterController {
     //<editor-fold desc="Hunter CRUD">
     @Operation(summary = "Get all hunters")
     @GetMapping
-    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN', 'ARCHIVIST')")
     public ResponseEntity<List<HunterResponseDto>> getAllHunters() {
         return ResponseEntity.ok(hunterService.getAllHunters());
     }
 
     @Operation(summary = "Get hunter by id")
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN', 'HUNTER')")
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN', 'ARCHIVIST') or @ExpeditionSecurity.isMyHunterProfile(#id, authentication)")
     public ResponseEntity<HunterResponseDto> getHunterById(@PathVariable UUID id) {
         return ResponseEntity.ok(hunterService.getHunterById(id));
     }
 
     @Operation(summary = "Get hunter's expeditions")
     @GetMapping("/{id}/expeditions")
-    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN', 'HUNTER')")
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN', 'ARCHIVIST') or @ExpeditionSecurity.isMyHunterProfile(#id, authentication)")
     public ResponseEntity<List<ExpeditionResponseDto>> getHuntersExpeditions(@PathVariable UUID id) {
         return ResponseEntity.ok(hunterService.getHuntersExpeditions(id));
     }
 
     @Operation(summary = "Create new hunter")
     @PostMapping
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN')")
     public ResponseEntity<HunterResponseDto> createHunter(@Valid @RequestBody HunterRequestDto hunterRequestDto) {
         HunterResponseDto createdHunter = hunterService.createHunter(hunterRequestDto);
         return ResponseEntity.created(URI.create("/api/hunters/" + createdHunter.id())).body(createdHunter);
@@ -61,6 +62,7 @@ public class HunterController {
 
     @Operation(summary = "Update existing hunter by id")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('COMMANDER', 'ADMIN'), or @ExpeditionSecurity.isMyHunterProfile(#id, authentication)")
     public ResponseEntity<HunterResponseDto> updateHunter(@PathVariable UUID id, @Valid @RequestBody HunterRequestDto hunterRequestDto) {
         return ResponseEntity.ok(hunterService.update(id, hunterRequestDto));
     }
