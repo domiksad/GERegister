@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -89,6 +90,22 @@ public class GlobalExceptionHandler {
             code.value(),
             "Forbidden",
             "You don't have access to this operation or data");
+
+    return new ResponseEntity<>(errorResponse, code);
+  }
+
+  @ExceptionHandler(BadCredentialsException.class)
+  public ResponseEntity<ErrorResponse> handleAccessDeniedException(BadCredentialsException ex) {
+    logger.warning("Access Denied: " + ex.getMessage());
+
+    HttpStatus code = HttpStatus.UNAUTHORIZED; // 401
+
+    ErrorResponse errorResponse =
+        new ErrorResponse(
+            Instant.now(),
+            code.value(),
+            "Forbidden",
+            "Bad credentials");
 
     return new ResponseEntity<>(errorResponse, code);
   }

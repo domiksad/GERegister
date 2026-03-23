@@ -23,7 +23,6 @@ import domiksad.GERegister.security.repository.UserRepository;
 import java.util.HashSet;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,7 +36,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class SecurityTest {
-  // TODO: Fix disabled tests
 
   @Autowired private MockMvc mockMvc;
   @Autowired private HunterRepository hunterRepository;
@@ -47,6 +45,7 @@ public class SecurityTest {
 
   @BeforeEach
   void setUp() {
+    expeditionRepository.deleteAll();
     userRepository.deleteAll();
     hunterRepository.deleteAll();
     userRepository.deleteAll();
@@ -79,18 +78,14 @@ public class SecurityTest {
   }
 
   @Test
-  @Disabled
   void hunterAccessNotHisData_throwsForbidden() throws Exception {
-    UUID id1 = UUID.randomUUID();
-    UUID id2 = UUID.randomUUID();
+    HunterEntity h1 = new HunterEntity(null, "abc", new HashSet<>());
+    HunterEntity h2 = new HunterEntity(null, "def", new HashSet<>());
 
-    HunterEntity h1 = new HunterEntity(id1, "abc", new HashSet<>());
-    HunterEntity h2 = new HunterEntity(id2, "def", new HashSet<>());
+    hunterRepository.save(h1);
+    hunterRepository.save(h2);
 
-    hunterRepository.saveAndFlush(h1);
-    hunterRepository.saveAndFlush(h2);
-
-    authService.register(new RegisterRequest(new SignupRequest("ABC", "DEF"), Role.HUNTER, id1));
+    authService.register(new RegisterRequest(new SignupRequest("ABC", "DEF"), Role.HUNTER, h1.getId()));
 
     User userPrincipal =
         userRepository
@@ -98,7 +93,7 @@ public class SecurityTest {
             .orElseThrow(() -> new RuntimeException("User not found"));
 
     mockMvc
-        .perform(get("/api/hunters/%s".formatted(id2)).with(user(userPrincipal)))
+        .perform(get("/api/hunters/%s".formatted(h2.getId())).with(user(userPrincipal)))
         .andExpect(status().isForbidden());
   }
 
@@ -131,7 +126,6 @@ public class SecurityTest {
   }
 
   @Test
-  @Disabled
   void adminDeletesExpedition() throws Exception {
     authService.register(new RegisterRequest(new SignupRequest("ABC", "DEF"), Role.ADMIN, null));
 
@@ -140,15 +134,48 @@ public class SecurityTest {
             .findByUsername("ABC")
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-    UUID id = UUID.randomUUID();
     ExpeditionEntity e =
         new ExpeditionEntity(
-            id, "abc", "def", Difficulty.EASY, ExpeditionStatus.CREATED, null, null, null);
+            null, "abc", "def", Difficulty.EASY, ExpeditionStatus.CREATED, null, null, null);
 
     expeditionRepository.saveAndFlush(e);
 
     mockMvc
-        .perform(delete("/api/expeditions/" + id).with(user(userPrincipal)))
+        .perform(delete("/api/expeditions/" + e.getId()).with(user(userPrincipal)))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void loginCorrect() throws Exception {
+    authService.register(new RegisterRequest(new SignupRequest("ABC", "DEF"), Role.ADMIN, null));
+
+    String req =
+        """
+        {
+          "username": "ABC",
+          "password": "DEF"
+        }
+        """;
+
+    mockMvc
+        .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(req))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  void loginIncorrect() throws Exception {
+    authService.register(new RegisterRequest(new SignupRequest("ABC", "DEF"), Role.ADMIN, null));
+
+    String req =
+        """
+        {
+          "username": "ABC",
+          "password": "DEFED"
+        }
+        """;
+
+    mockMvc
+        .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(req))
+        .andExpect(status().isUnauthorized());
   }
 }
