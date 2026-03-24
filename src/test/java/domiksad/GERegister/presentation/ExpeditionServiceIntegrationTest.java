@@ -19,6 +19,7 @@ import domiksad.GERegister.presentation.dto.HunterRequestDto;
 import domiksad.GERegister.presentation.dto.HunterResponseDto;
 import java.util.UUID;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,7 @@ class ExpeditionServiceIntegrationTest {
     assertNotNull(result.id());
 
     ExpeditionEntity entity = expeditionRepository.findById(result.id()).orElseThrow();
+
     assertEquals("ABC", entity.getName());
     assertEquals("DEF", entity.getDescription());
     assertEquals(Difficulty.HARD, entity.getDifficulty());

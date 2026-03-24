@@ -25,7 +25,4 @@ public class HunterEntity {
   private UUID id;
 
   private String name;
-
-  @ManyToMany(mappedBy = "hunters")
-  private Set<ExpeditionEntity> expeditions;
 }

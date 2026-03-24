@@ -1,4 +1,4 @@
-package domiksad.GERegister.presentation;
+package domiksad.GERegister.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,16 +16,15 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.UUID;
-
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 public class ExpeditionMapperTest {
-  private ExpeditionMapper mapper = Mappers.getMapper(ExpeditionMapper.class);
+  private final ExpeditionMapper mapper = Mappers.getMapper(ExpeditionMapper.class);
 
   private HashSet<HunterEntity> getHunterEntitySet() {
-    HunterEntity h1 = new HunterEntity(UUID.randomUUID(), "Alice", new HashSet<>());
-    HunterEntity h2 = new HunterEntity(UUID.randomUUID(), "Bob", new HashSet<>());
+    HunterEntity h1 = new HunterEntity(UUID.randomUUID(), "Alice");
+    HunterEntity h2 = new HunterEntity(UUID.randomUUID(), "Bob");
     HashSet<HunterEntity> hunters = new HashSet<>();
     hunters.add(h1);
     hunters.add(h2);
@@ -33,8 +32,8 @@ public class ExpeditionMapperTest {
   }
 
   private HashSet<Hunter> getHunterDomainSet() {
-    Hunter h1 = new Hunter(UUID.randomUUID(), "Alice", new HashSet<>());
-    Hunter h2 = new Hunter(UUID.randomUUID(), "Bob", new HashSet<>());
+    Hunter h1 = new Hunter(UUID.randomUUID(), "Alice");
+    Hunter h2 = new Hunter(UUID.randomUUID(), "Bob");
     HashSet<Hunter> hunters = new HashSet<>();
     hunters.add(h1);
     hunters.add(h2);

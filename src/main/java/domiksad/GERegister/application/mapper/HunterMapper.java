@@ -8,16 +8,11 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "default")
 public interface HunterMapper {
+    HunterEntity fromDtoToEntity(HunterRequestDto hunterRequestDto);
 
-    Hunter hunterRequestDtoToHunter(HunterRequestDto hunterRequestDto);
+    Hunter fromEntity(HunterEntity hunterEntity);
 
-    HunterResponseDto hunterToHunterResponseDto(Hunter hunter);
+    HunterEntity toEntity(Hunter hunter);
 
-    Hunter hunterEntityToHunter(HunterEntity hunterEntity);
-
-    HunterEntity hunterToHunterEntity(Hunter hunter);
-
-    HunterResponseDto hunterEntityToHunterResponseDto(HunterEntity hunterEntity);
-
-    HunterEntity hunterRequestDtoToHunterEntity(HunterRequestDto hunterRequestDto);
+    HunterResponseDto toDto(HunterEntity hunterEntity);
 }

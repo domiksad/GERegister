@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import domiksad.GERegister.infrastructure.repository.ExpeditionRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,6 @@ public class Expedition {
       throw new ExpeditionException("Expedition must be in CREATED status to add hunters");
     if (!hunters.contains(hunter)) {
       hunters.add(hunter);
-      hunter.addExpedition(this);
     }
   }
 
@@ -42,13 +42,13 @@ public class Expedition {
     hunters.remove(hunter);
   }
 
-  public void start() {
+  public void start(boolean isAnyHunterBusy) {
     if (status != ExpeditionStatus.CREATED)
       throw new ExpeditionException("Expedition must be in CREATED status to start");
 
     if (hunters.isEmpty()) throw new ExpeditionException("Cannot start expedition without hunters");
 
-    if (hunters.stream().anyMatch(Hunter::isInProgress))
+    if (isAnyHunterBusy)
       throw new ExpeditionException("One or more hunters are already in another expedition");
 
     status = ExpeditionStatus.IN_PROGRESS;

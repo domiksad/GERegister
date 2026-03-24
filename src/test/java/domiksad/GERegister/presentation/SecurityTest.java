@@ -20,8 +20,6 @@ import domiksad.GERegister.security.dto.SignupRequest;
 import domiksad.GERegister.security.entity.Role;
 import domiksad.GERegister.security.entity.User;
 import domiksad.GERegister.security.repository.UserRepository;
-import java.util.HashSet;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,13 +77,14 @@ public class SecurityTest {
 
   @Test
   void hunterAccessNotHisData_throwsForbidden() throws Exception {
-    HunterEntity h1 = new HunterEntity(null, "abc", new HashSet<>());
-    HunterEntity h2 = new HunterEntity(null, "def", new HashSet<>());
+    HunterEntity h1 = new HunterEntity(null, "abc");
+    HunterEntity h2 = new HunterEntity(null, "def");
 
     hunterRepository.save(h1);
     hunterRepository.save(h2);
 
-    authService.register(new RegisterRequest(new SignupRequest("ABC", "DEF"), Role.HUNTER, h1.getId()));
+    authService.register(
+        new RegisterRequest(new SignupRequest("ABC", "DEF"), Role.HUNTER, h1.getId()));
 
     User userPrincipal =
         userRepository

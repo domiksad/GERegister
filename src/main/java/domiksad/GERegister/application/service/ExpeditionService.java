@@ -61,7 +61,7 @@ public class ExpeditionService {
   }
 
   public List<HunterResponseDto> getHuntersAssignedToExpedition(UUID id) {
-    return expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)).getHunters().stream().map(hunterMapper::hunterEntityToHunterResponseDto).toList();
+    return expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)).getHunters().stream().map(hunterMapper::toDto).toList();
   }
 
   public ExpeditionResponseDto createExpedition(ExpeditionRequestDto expeditionRequestDto) {
@@ -115,7 +115,10 @@ public class ExpeditionService {
 
   public ExpeditionResponseDto startExpedition(UUID id) {
     Expedition expedition = expeditionMapper.fromEntity(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
-    expedition.start();
+
+    boolean isAnyHunterBusy = expedition.getHunters().stream()
+        .anyMatch(h -> expeditionRepository.existsByHuntersIdAndStatus(h.getId(), ExpeditionStatus.IN_PROGRESS));
+    expedition.start(isAnyHunterBusy);
 
     ExpeditionEntity saved = expeditionMapper.toEntity(expedition);
     saved.setId(id);

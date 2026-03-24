@@ -15,4 +15,6 @@ public class MapperConfig {
   public ExpeditionMapper expeditionMapper(){
     return Mappers.getMapper(ExpeditionMapper.class);
   }
+
+
 }

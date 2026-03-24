@@ -2,6 +2,7 @@ package domiksad.GERegister.security;
 
 import domiksad.GERegister.infrastructure.repository.ExpeditionRepository;
 import domiksad.GERegister.security.entity.User;
+import domiksad.GERegister.security.exception.UserNotFoundException;
 import domiksad.GERegister.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -20,13 +21,8 @@ public class ExpeditionSecurity {
   @Transactional(readOnly = true)
   public boolean isHunterInExpedition(UUID expeditionId, Authentication authentication) {
     if (authentication.getPrincipal() instanceof User user) {
-      return userRepository.findById(user.getId())
-          .map(User::getHunter)
-          .filter(hunter -> hunter != null)
-          .map(hunter -> hunter.getExpeditions().stream()
-              .anyMatch(expedition -> expedition.getId().equals(expeditionId))
-          )
-          .orElse(false);
+      UUID hunterId = userRepository.findById(user.getId()).orElseThrow(() -> new UserNotFoundException(user.getId())).getHunter().getId();
+      return expeditionRepository.existsByIdAndHuntersId(expeditionId, hunterId);
     }
     return false;
   }
