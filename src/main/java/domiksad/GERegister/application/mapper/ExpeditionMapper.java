@@ -9,6 +9,11 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "default", uses = HunterMapper.class)
 public interface ExpeditionMapper {
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "status", ignore = true)
+  @Mapping(target = "startDate", ignore = true)
+  @Mapping(target = "finishDate", ignore = true)
+  @Mapping(target = "hunters", ignore = true)
   ExpeditionEntity fromDtoToEntity(ExpeditionRequestDto expeditionRequestDto);
 
   Expedition fromEntity(ExpeditionEntity expeditionEntity);

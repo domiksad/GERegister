@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -106,6 +107,20 @@ public class GlobalExceptionHandler {
             code.value(),
             "Forbidden",
             "Bad credentials");
+
+    return new ResponseEntity<>(errorResponse, code);
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException ex) {
+    HttpStatus code = HttpStatus.NOT_FOUND; // 404
+
+    ErrorResponse errorResponse = new ErrorResponse(
+        Instant.now(),
+        code.value(),
+        "Not Found",
+        "The requested resource does not exist: " + ex.getResourcePath()
+    );
 
     return new ResponseEntity<>(errorResponse, code);
   }

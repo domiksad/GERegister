@@ -5,14 +5,16 @@ import domiksad.GERegister.infrastructure.entity.HunterEntity;
 import domiksad.GERegister.presentation.dto.HunterRequestDto;
 import domiksad.GERegister.presentation.dto.HunterResponseDto;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "default")
 public interface HunterMapper {
-    HunterEntity fromDtoToEntity(HunterRequestDto hunterRequestDto);
+  @Mapping(target="id", ignore = true)
+  HunterEntity fromDtoToEntity(HunterRequestDto hunterRequestDto);
 
-    Hunter fromEntity(HunterEntity hunterEntity);
+  Hunter fromEntity(HunterEntity hunterEntity);
 
-    HunterEntity toEntity(Hunter hunter);
+  HunterEntity toEntity(Hunter hunter);
 
-    HunterResponseDto toDto(HunterEntity hunterEntity);
+  HunterResponseDto toDto(HunterEntity hunterEntity);
 }
