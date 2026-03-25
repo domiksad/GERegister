@@ -14,7 +14,8 @@ public class JwtAuthConverterConfig {
   Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
     JwtGrantedAuthoritiesConverter rolesConverter = new JwtGrantedAuthoritiesConverter();
     rolesConverter.setAuthoritiesClaimName("roles");
-    rolesConverter.setAuthorityPrefix("");
+    rolesConverter.setAuthorityPrefix("ROLE_");
+
     JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(rolesConverter);
     return converter;

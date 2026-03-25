@@ -8,28 +8,30 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import domiksad.GERegister.application.exceptions.HunterNotFoundException;
 import domiksad.GERegister.application.service.ExpeditionService;
 import domiksad.GERegister.application.service.HunterService;
+import domiksad.GERegister.domain.exceptions.ExpeditionException;
 import domiksad.GERegister.domain.expedition.Difficulty;
 import domiksad.GERegister.domain.expedition.ExpeditionStatus;
 import domiksad.GERegister.infrastructure.entity.ExpeditionEntity;
+import domiksad.GERegister.infrastructure.entity.HunterEntity;
 import domiksad.GERegister.infrastructure.repository.ExpeditionRepository;
 import domiksad.GERegister.infrastructure.repository.HunterRepository;
 import domiksad.GERegister.presentation.dto.ExpeditionRequestDto;
 import domiksad.GERegister.presentation.dto.ExpeditionResponseDto;
 import domiksad.GERegister.presentation.dto.HunterRequestDto;
 import domiksad.GERegister.presentation.dto.HunterResponseDto;
-import java.util.UUID;
-
 import jakarta.transaction.Transactional;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-@Disabled
+@Transactional
 class ExpeditionServiceIntegrationTest {
-  // TODO: fix mappings and add tests for them, then fix this test
 
   @Autowired private ExpeditionService expeditionService;
 
@@ -78,6 +80,22 @@ class ExpeditionServiceIntegrationTest {
   }
 
   @Test
+  void shouldRemoveHunterFromExpedition() {
+    HunterRequestDto hunterDto = new HunterRequestDto("Ciri");
+    HunterResponseDto hunter = hunterService.createHunter(hunterDto);
+
+    ExpeditionRequestDto expeditionDto = new ExpeditionRequestDto("Test", "Test", Difficulty.EASY);
+    ExpeditionResponseDto expedition = expeditionService.createExpedition(expeditionDto);
+
+    expeditionService.assignHunterToExpedition(expedition.id(), hunter.id());
+    expeditionService.removeHunterFromExpedition(expedition.id(), hunter.id());
+
+    ExpeditionEntity saved = expeditionRepository.findById(expedition.id()).orElseThrow();
+
+    assertTrue(saved.getHunters().isEmpty());
+  }
+
+  @Test
   void shouldThrowWhenAssigningNonExistingHunter() {
     ExpeditionRequestDto expeditionDto = new ExpeditionRequestDto("Test", "Test", Difficulty.EASY);
     ExpeditionResponseDto expedition = expeditionService.createExpedition(expeditionDto);
@@ -85,6 +103,48 @@ class ExpeditionServiceIntegrationTest {
     assertThrows(
         HunterNotFoundException.class,
         () -> expeditionService.assignHunterToExpedition(expedition.id(), UUID.randomUUID()));
+  }
+
+  @Test
+  void assignHunterToInProgressExpeditionThrowsException() {
+    ExpeditionEntity expeditionEntity =
+        new ExpeditionEntity(
+            null,
+            "Test",
+            "Test",
+            Difficulty.EASY,
+            ExpeditionStatus.IN_PROGRESS,
+            Instant.now(),
+            null,
+            new HashSet<>());
+
+    UUID expeditionId = expeditionRepository.save(expeditionEntity).getId();
+    UUID hunterId = hunterRepository.save(new HunterEntity(null, "Test")).getId();
+
+    assertThrows(
+        ExpeditionException.class,
+        () -> expeditionService.assignHunterToExpedition(expeditionId, hunterId));
+  }
+
+  @Test
+  void removeHunterFromFinishedExpeditionThrowsException(){
+    HunterEntity hunter = hunterRepository.save(new HunterEntity(null, "Test"));
+    ExpeditionEntity expeditionEntity =
+        new ExpeditionEntity(
+            null,
+            "Test",
+            "Test",
+            Difficulty.EASY,
+            ExpeditionStatus.FINISHED,
+            Instant.now(),
+            null,
+            new HashSet<>(Set.of(hunter)));
+
+    UUID expeditionId = expeditionRepository.save(expeditionEntity).getId();
+
+    assertThrows(
+        ExpeditionException.class,
+        () -> expeditionService.removeHunterFromExpedition(expeditionId, hunter.getId()));
   }
 
   @Test
@@ -100,21 +160,5 @@ class ExpeditionServiceIntegrationTest {
     ExpeditionResponseDto started = expeditionService.startExpedition(expedition.id());
 
     assertEquals(ExpeditionStatus.IN_PROGRESS, started.status());
-  }
-
-  @Test
-  void shouldRemoveHunterFromExpedition() {
-    HunterRequestDto hunterDto = new HunterRequestDto("Ciri");
-    HunterResponseDto hunter = hunterService.createHunter(hunterDto);
-
-    ExpeditionRequestDto expeditionDto = new ExpeditionRequestDto("Test", "Test", Difficulty.EASY);
-    ExpeditionResponseDto expedition = expeditionService.createExpedition(expeditionDto);
-
-    expeditionService.assignHunterToExpedition(expedition.id(), hunter.id());
-    expeditionService.removeHunterFromExpedition(expedition.id(), hunter.id());
-
-    ExpeditionEntity saved = expeditionRepository.findById(expedition.id()).orElseThrow();
-
-    assertTrue(saved.getHunters().isEmpty());
   }
 }

@@ -10,11 +10,10 @@ import domiksad.GERegister.presentation.dto.ExpeditionResponseDto;
 import domiksad.GERegister.presentation.dto.HunterRequestDto;
 import domiksad.GERegister.presentation.dto.HunterResponseDto;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
@@ -22,7 +21,7 @@ import java.util.UUID;
 public class HunterService {
 
   private final HunterRepository hunterRepository;
-private final ExpeditionRepository expeditionRepository;
+  private final ExpeditionRepository expeditionRepository;
 
   private final HunterMapper hunterMapper;
   private final ExpeditionMapper expeditionMapper;
@@ -32,26 +31,28 @@ private final ExpeditionRepository expeditionRepository;
   }
 
   public HunterResponseDto getHunterById(UUID id) {
-    return hunterMapper.toDto(hunterRepository.findById(id).orElseThrow(() -> new HunterNotFoundException(id)));
+    return hunterMapper.toDto(
+        hunterRepository.findById(id).orElseThrow(() -> new HunterNotFoundException(id)));
   }
 
   public List<ExpeditionResponseDto> getHuntersExpeditions(UUID id) {
-    return expeditionRepository.findAllByHuntersId(id).stream().map(expeditionMapper::toDto).toList();
+    return expeditionRepository.findAllByHuntersId(id).stream()
+        .map(expeditionMapper::toDto)
+        .toList();
   }
 
   public HunterResponseDto createHunter(HunterRequestDto hunterRequestDto) {
-    return hunterMapper.toDto(hunterRepository.save(hunterMapper.fromDtoToEntity(hunterRequestDto)));
+    return hunterMapper.toDto(
+        hunterRepository.save(hunterMapper.fromDtoToEntity(hunterRequestDto)));
   }
 
   public HunterResponseDto update(UUID id, HunterRequestDto dto) {
-    HunterEntity entity = hunterRepository.findById(id)
-        .orElseThrow(() -> new HunterNotFoundException(id));
+    HunterEntity entity =
+        hunterRepository.findById(id).orElseThrow(() -> new HunterNotFoundException(id));
 
     entity.setName(dto.name());
 
-    return hunterMapper.toDto(
-        hunterRepository.save(entity)
-    );
+    return hunterMapper.toDto(hunterRepository.save(entity));
   }
 
   public void deleteHunterById(UUID id) {

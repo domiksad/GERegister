@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,8 +33,20 @@ public class ExpeditionEntity {
   private String description;
   private Difficulty difficulty;
   private ExpeditionStatus status = ExpeditionStatus.CREATED;
-  private Instant startDate;
-  private Instant finishDate;
+  private Instant startDate = null;
+  private Instant finishDate = null;
 
-  @ManyToMany private Set<HunterEntity> hunters;
+  @ManyToMany private Set<HunterEntity> hunters = new HashSet<>();
+
+  public Set<HunterEntity> getHunters() {
+    return Collections.unmodifiableSet(hunters);
+  }
+
+  public void addHunter(HunterEntity hunter) {
+    this.hunters.add(hunter);
+  }
+
+  public void removeHunter(UUID hunterId) {
+    this.hunters.removeIf(h -> h.getId().equals(hunterId));
+  }
 }

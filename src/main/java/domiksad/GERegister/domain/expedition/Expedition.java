@@ -24,16 +24,14 @@ public class Expedition {
   private String description;
   private Difficulty difficulty;
   private ExpeditionStatus status = ExpeditionStatus.CREATED;
-  private Instant startDate;
-  private Instant finishDate;
+  private Instant startDate = null;
+  private Instant finishDate = null;
   private Set<Hunter> hunters = new HashSet<>() {};
 
   public void addHunter(Hunter hunter) {
     if (status != ExpeditionStatus.CREATED)
       throw new ExpeditionException("Expedition must be in CREATED status to add hunters");
-    if (!hunters.contains(hunter)) {
-      hunters.add(hunter);
-    }
+    hunters.add(hunter);
   }
 
   public void removeHunter(Hunter hunter) {

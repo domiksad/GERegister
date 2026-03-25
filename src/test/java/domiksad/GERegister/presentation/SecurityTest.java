@@ -60,7 +60,7 @@ public class SecurityTest {
         """
             {
               "name": "abc",
-              "reward": "def",
+              "description": "def",
               "difficulty": "EASY"
             }
             """;

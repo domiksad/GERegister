@@ -7,6 +7,7 @@ import domiksad.GERegister.application.mapper.HunterMapper;
 import domiksad.GERegister.domain.expedition.Difficulty;
 import domiksad.GERegister.domain.expedition.Expedition;
 import domiksad.GERegister.domain.expedition.ExpeditionStatus;
+import domiksad.GERegister.domain.hunter.Hunter;
 import domiksad.GERegister.infrastructure.entity.ExpeditionEntity;
 import domiksad.GERegister.infrastructure.entity.HunterEntity;
 import domiksad.GERegister.infrastructure.repository.ExpeditionRepository;
@@ -16,14 +17,13 @@ import domiksad.GERegister.presentation.dto.ExpeditionResponseDto;
 import domiksad.GERegister.presentation.dto.HunterResponseDto;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -86,45 +86,54 @@ public class ExpeditionService {
   }
 
   public ExpeditionResponseDto assignHunterToExpedition(UUID expeditionId, UUID hunterId) {
-    ExpeditionEntity expedition = expeditionRepository.findById(expeditionId)
+    ExpeditionEntity entity = expeditionRepository.findById(expeditionId)
         .orElseThrow(() -> new ExpeditionNotFoundException(expeditionId));
 
-    HunterEntity hunter = hunterRepository.findById(hunterId)
+    HunterEntity hunterEntity = hunterRepository.findById(hunterId)
         .orElseThrow(() -> new HunterNotFoundException(hunterId));
 
-    expedition.getHunters().add(hunter);
+    Expedition domain = expeditionMapper.fromEntity(entity);
+    domain.addHunter(hunterMapper.fromEntity(hunterEntity));
 
-    expeditionRepository.save(expedition);
+    entity.addHunter(hunterEntity);
 
-    return expeditionMapper.toDto(expedition);
+    ExpeditionEntity saved = expeditionRepository.save(entity);
+
+    return expeditionMapper.toDto(saved);
   }
 
   public ExpeditionResponseDto removeHunterFromExpedition(UUID expeditionId, UUID hunterId) {
-    ExpeditionEntity expedition = expeditionRepository.findById(expeditionId)
+    ExpeditionEntity entity = expeditionRepository.findById(expeditionId)
         .orElseThrow(() -> new ExpeditionNotFoundException(expeditionId));
 
-    HunterEntity hunter = hunterRepository.findById(hunterId)
+    HunterEntity hunterEntity = hunterRepository.findById(hunterId)
         .orElseThrow(() -> new HunterNotFoundException(hunterId));
 
-    expedition.getHunters().remove(hunter);
+    Expedition domain = expeditionMapper.fromEntity(entity);
+    domain.removeHunter(hunterMapper.fromEntity(hunterEntity));
 
-    expeditionRepository.save(expedition);
+    entity.removeHunter(hunterId);
 
-    return expeditionMapper.toDto(expedition);
+    ExpeditionEntity saved = expeditionRepository.save(entity);
+
+    return expeditionMapper.toDto(saved);
   }
 
   public ExpeditionResponseDto startExpedition(UUID id) {
-    Expedition expedition = expeditionMapper.fromEntity(expeditionRepository.findById(id).orElseThrow(() -> new ExpeditionNotFoundException(id)));
+    ExpeditionEntity entity = expeditionRepository.findById(id)
+        .orElseThrow(() -> new ExpeditionNotFoundException(id));
 
-    boolean isAnyHunterBusy = expedition.getHunters().stream()
+    Expedition domain = expeditionMapper.fromEntity(entity);
+
+    boolean isAnyHunterBusy = entity.getHunters().stream()
         .anyMatch(h -> expeditionRepository.existsByHuntersIdAndStatus(h.getId(), ExpeditionStatus.IN_PROGRESS));
-    expedition.start(isAnyHunterBusy);
 
-    ExpeditionEntity saved = expeditionMapper.toEntity(expedition);
-    saved.setId(id);
-    expeditionRepository.save(saved);
+    domain.start(isAnyHunterBusy);
 
-    return expeditionMapper.toDto(expedition);
+    entity.setStatus(domain.getStatus());
+    entity.setStartDate(domain.getStartDate());
+
+    return expeditionMapper.toDto(entity);
   }
 
   public ExpeditionResponseDto finishExpedition(UUID id) {

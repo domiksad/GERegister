@@ -42,10 +42,6 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/**").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/expeditions").permitAll()
-            .requestMatchers("/api/admin/**").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.POST, "/api/expeditions/**").hasAnyRole("COMMANDER",
-                "ADMIN")
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 -> oauth2
