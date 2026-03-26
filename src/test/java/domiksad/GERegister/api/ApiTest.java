@@ -1,9 +1,11 @@
 package domiksad.GERegister.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -559,10 +561,11 @@ public class ApiTest {
         }
         """;
     mockMvc
-        .perform(post("/api/expeditions")
-            .with(getJwtAdmin())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(req))
+        .perform(
+            post("/api/expeditions")
+                .with(getJwtAdmin())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(req))
         .andExpect(status().isBadRequest());
   }
 
@@ -572,7 +575,239 @@ public class ApiTest {
         .perform(post("/api/expeditions").with(getJwtAdmin()))
         .andExpect(status().isBadRequest());
   }
+
   // </editor-fold>
 
+  // <editor-fold desc="updateExpedition">
+  private void updateExpedition(JwtRequestPostProcessor role) throws Exception {
+    UUID id =
+        expeditionRepository
+            .save(
+                new ExpeditionEntity(
+                    null,
+                    "Test",
+                    "Test",
+                    Difficulty.HARD,
+                    ExpeditionStatus.CREATED,
+                    null,
+                    null,
+                    new HashSet<>()))
+            .getId();
 
+    String req =
+        """
+      {
+        "name": "abc",
+        "description": "abcdef",
+        "difficulty": "EASY"
+        }
+      """;
+
+    mockMvc
+        .perform(
+            put("/api/expeditions/" + id.toString())
+                .with(role)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(req))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("abc"))
+        .andExpect(jsonPath("$.description").value("abcdef"))
+        .andExpect(jsonPath("$.difficulty").value("EASY"));
+
+    ExpeditionEntity updatedEntity = expeditionRepository.findById(id).orElseThrow();
+    assertEquals("abc", updatedEntity.getName());
+    assertEquals("abcdef", updatedEntity.getDescription());
+    assertEquals(Difficulty.EASY, updatedEntity.getDifficulty());
+    assertEquals(ExpeditionStatus.CREATED, updatedEntity.getStatus());
+  }
+
+  @Test
+  void updateExpeditionWithAdmin() throws Exception {
+    updateExpedition(getJwtAdmin());
+  }
+
+  @Test
+  void updateExpeditionWithCommander() throws Exception {
+    updateExpedition(getJwtAdmin());
+  }
+
+  @Test
+  void updateExpeditionWithArchivist_throwsException() throws Exception {
+    UUID id =
+        expeditionRepository
+            .save(
+                new ExpeditionEntity(
+                    null,
+                    "Test",
+                    "Test",
+                    Difficulty.HARD,
+                    ExpeditionStatus.CREATED,
+                    null,
+                    null,
+                    new HashSet<>()))
+            .getId();
+
+    String req =
+        """
+      {
+        "name": "abc",
+        "description": "abcdef",
+        "difficulty": "EASY"
+        }
+      """;
+
+    mockMvc
+        .perform(
+            put("/api/expeditions/" + id.toString())
+                .with(getJwtArchivist())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(req))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void updateExpeditionWithHunter_throwsException() throws Exception {
+    UUID id =
+        expeditionRepository
+            .save(
+                new ExpeditionEntity(
+                    null,
+                    "Test",
+                    "Test",
+                    Difficulty.HARD,
+                    ExpeditionStatus.CREATED,
+                    null,
+                    null,
+                    new HashSet<>()))
+            .getId();
+
+    String req =
+        """
+      {
+        "name": "abc",
+        "description": "abcdef",
+        "difficulty": "EASY"
+        }
+      """;
+
+    mockMvc
+        .perform(
+            put("/api/expeditions/" + id.toString())
+                .with(getJwtHunter())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(req))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void updateExpeditionWithAnonymous_throwsException() throws Exception {
+    UUID id =
+        expeditionRepository
+            .save(
+                new ExpeditionEntity(
+                    null,
+                    "Test",
+                    "Test",
+                    Difficulty.HARD,
+                    ExpeditionStatus.CREATED,
+                    null,
+                    null,
+                    new HashSet<>()))
+            .getId();
+
+    String req =
+        """
+      {
+        "name": "abc",
+        "description": "abcdef",
+        "difficulty": "EASY"
+      """;
+
+    mockMvc
+        .perform(
+            put("/api/expeditions/" + id.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(req))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void updateExpeditionWithoutExpeditionId_throwsException() throws Exception {
+    String req =
+        """
+      {
+        "name": "abc",
+        "description": "abcdef",
+        "difficulty": "EASY"
+        }
+      """;
+
+    mockMvc
+        .perform(
+            put("/api/expeditions/")
+                .with(getJwtAdmin())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(req))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void updateExpeditionWithBadId_throwsException() throws Exception {
+    String req =
+        """
+      {
+        "name": "abc",
+        "description": "abcdef",
+        "difficulty": "EASY"
+        }
+      """;
+
+    mockMvc
+        .perform(
+            put("/api/expeditions/" + UUID.randomUUID())
+                .with(getJwtAdmin())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(req))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void updateExpeditionWithBadJson_throwsException() throws Exception {
+    String req =
+        """
+      {
+        "name": "",
+        "description": "abcdef",
+        "difficulty": "EASY"
+      """;
+
+    mockMvc
+        .perform(
+            put("/api/expeditions/" + UUID.randomUUID())
+                .with(getJwtAdmin())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(req))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void updateExpeditionWithBadJsonParameters_throwsException() throws Exception {
+    String req =
+        """
+      {
+        "name": "",
+        "description": "abcdef",
+        "difficulty": "EASY"
+        }
+      """;
+
+    mockMvc
+        .perform(
+            put("/api/expeditions/" + UUID.randomUUID())
+                .with(getJwtAdmin())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(req))
+        .andExpect(status().isBadRequest());
+  }
+  // </editor-fold>
 }
