@@ -3,13 +3,13 @@ package domiksad.GERegister.api;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import domiksad.GERegister.domain.expedition.Difficulty;
 import domiksad.GERegister.domain.expedition.ExpeditionStatus;
-import domiksad.GERegister.domain.hunter.Hunter;
 import domiksad.GERegister.infrastructure.entity.ExpeditionEntity;
 import domiksad.GERegister.infrastructure.entity.HunterEntity;
 import domiksad.GERegister.infrastructure.repository.ExpeditionRepository;
@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class ApiTest {
-  @Autowired MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
   @Autowired private ExpeditionRepository expeditionRepository;
   @Autowired private HunterRepository hunterRepository;
   @Autowired private UserRepository userRepository;
@@ -102,9 +101,7 @@ public class ApiTest {
             new HashSet<>()));
 
     mockMvc
-        .perform(get("/api/expeditions")
-            .with(role)
-            .accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/expeditions").with(role).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.content").isArray())
@@ -455,5 +452,127 @@ public class ApiTest {
   void getHunterAssignedExpeditionWithoutParameter_throwsException() throws Exception {
     mockMvc.perform(get("/api/expeditions/").with(getJwtAdmin())).andExpect(status().isNotFound());
   }
+
   // </editor-fold>
+
+  // <editor-fold desc="createExpedition">
+  private void createExpedition(JwtRequestPostProcessor role) throws Exception {
+    String req =
+        """
+         {
+          "name": "TEST",
+          "description": "TEST DESCRIPTION",
+          "difficulty": "HARD"
+          }
+         """;
+
+    mockMvc
+        .perform(
+            post("/api/expeditions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(role)
+                .content(req)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id").isString())
+        .andExpect(jsonPath("$.name").value("TEST"))
+        .andExpect(jsonPath("$.description").value("TEST DESCRIPTION"))
+        .andExpect(jsonPath("$.difficulty").value("HARD"))
+        .andExpect(jsonPath("$.status").value("CREATED"))
+        .andExpect(jsonPath("$.startDate").isEmpty())
+        .andExpect(jsonPath("$.finishDate").isEmpty());
+  }
+
+  @Test
+  void createExpeditionWithAdmin() throws Exception {
+    createExpedition(getJwtAdmin());
+  }
+
+  @Test
+  void createExpeditionWithCommander() throws Exception {
+    createExpedition(getJwtCommander());
+  }
+
+  @Test
+  void createExpeditionWithArchivist_throwsException() throws Exception {
+    String req =
+        """
+         {
+          "name": "TEST",
+          "description": "TEST DESCRIPTION",
+          "difficulty": "HARD"
+          }
+        """;
+
+    mockMvc
+        .perform(
+            post("/api/expeditions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(getJwtArchivist())
+                .content(req))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void createExpeditionWithHunter_throwsException() throws Exception {
+    String req =
+        """
+                 {
+                  "name": "TEST",
+                  "description": "TEST DESCRIPTION",
+                  "difficulty": "HARD"
+                  }
+                 """;
+
+    mockMvc
+        .perform(
+            post("/api/expeditions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(getJwtHunter())
+                .content(req))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void createExpeditionWithAnonymous_throwsException() throws Exception {
+    String req =
+        """
+         {
+          "name": "TEST",
+          "description": "TEST DESCRIPTION",
+          "difficulty": "HARD"
+          }
+         """;
+
+    mockMvc
+        .perform(post("/api/expeditions").contentType(MediaType.APPLICATION_JSON).content(req))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void createExpeditionWithMissingParameters_throwsException() throws Exception {
+    String req =
+        """
+        {
+          "name": "abc"
+        }
+        """;
+    mockMvc
+        .perform(post("/api/expeditions")
+            .with(getJwtAdmin())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(req))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void createExpeditionWithoutParameters_throwsException() throws Exception {
+    mockMvc
+        .perform(post("/api/expeditions").with(getJwtAdmin()))
+        .andExpect(status().isBadRequest());
+  }
+  // </editor-fold>
+
+
 }

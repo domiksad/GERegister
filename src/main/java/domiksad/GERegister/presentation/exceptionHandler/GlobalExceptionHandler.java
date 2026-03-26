@@ -125,6 +125,22 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorResponse, code);
   }
 
+  @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+  public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+      org.springframework.http.converter.HttpMessageNotReadableException ex) {
+
+    HttpStatus code = HttpStatus.BAD_REQUEST; // 400
+
+    ErrorResponse errorResponse = new ErrorResponse(
+        Instant.now(),
+        code.value(),
+        "Malformed JSON request",
+        "Required request body is missing or invalid"
+    );
+
+    return new ResponseEntity<>(errorResponse, code);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
     logger.severe(ex.getMessage());
